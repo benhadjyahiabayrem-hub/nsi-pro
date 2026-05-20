@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSI.learn — Numérique et Sciences Informatiques</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="neuralCanvas"></canvas>
+
+<!-- HEADER -->
+<header class="top-header">
+    <div class="site-branding" onclick="showSection('accueil')" style="cursor:pointer;">
+        <i class="fa-solid fa-terminal"></i>
+        <span class="site-title">NSI<span class="accent-dot">.</span>learn</span>
+    </div>
+
+    <div class="search-wrapper">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="globalSearch" placeholder="Rechercher un cours, un concept..." oninput="handleSearch(this.value)" autocomplete="off">
+        <div id="searchResults" class="search-dropdown"></div>
+    </div>
+
+    <nav class="navbar">
+        <ul>
+            <li class="active" data-section="accueil" onclick="showSection('accueil')"><i class="fa-solid fa-house"></i><span>Accueil</span></li>
+            <li data-section="cours" onclick="showSection('cours')"><i class="fa-solid fa-book"></i><span>Cours</span></li>
+            <li data-section="ide" onclick="showSection('ide')"><i class="fa-brands fa-python"></i><span>IDE Python</span></li>
+            <li data-section="qcm" onclick="showSection('qcm')"><i class="fa-solid fa-circle-question"></i><span>QCM</span></li>
+            <li data-section="ressources" onclick="showSection('ressources')"><i class="fa-solid fa-folder-open"></i><span>Ressources</span></li>
+            <li data-section="glossaire" onclick="showSection('glossaire')"><i class="fa-solid fa-spell-check"></i><span>Glossaire</span></li>
+        </ul>
+    </nav>
+
+    <div class="xp-display" title="Vos points XP">
+        <i class="fa-solid fa-bolt"></i>
+        <span id="header-xp">0 XP</span>
+    </div>
+</header>
+
+<main>
+
+<!-- ===== ACCUEIL ===== -->
+<section id="accueil" class="content-section active-section">
+    <div class="hero-header">
+        <div class="hero-badge"><i class="fa-solid fa-graduation-cap"></i> Première & Terminale NSI</div>
+        <h1><span id="typewriter"></span><span class="cursor">|</span></h1>
+        <p>La plateforme complète pour maîtriser la spécialité <strong>Numérique et Sciences Informatiques</strong>.<br>Cours détaillés, IDE Python intégré, QCM interactifs et ressources Bac.</p>
+        <div class="hero-actions">
+            <button class="btn-primary" onclick="showSection('cours')"><i class="fa-solid fa-rocket"></i> Commencer à apprendre</button>
+            <button class="btn-secondary" onclick="showSection('ide')"><i class="fa-brands fa-python"></i> Ouvrir l'IDE Python</button>
+        </div>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card"><span class="stat-num">11</span><span class="stat-label">Chapitres</span></div>
+        <div class="stat-card"><span class="stat-num" id="completedCount">0</span><span class="stat-label">Complétés</span></div>
+        <div class="stat-card"><span class="stat-num">80+</span><span class="stat-label">Exercices</span></div>
+        <div class="stat-card"><span class="stat-num" id="xpDisplay">0</span><span class="stat-label">XP gagnés</span></div>
+    </div>
+
+    <h2 class="section-heading">Ce que tu vas maîtriser</h2>
+    <div class="cards-container">
+        <div class="card" onclick="showSection('cours')">
+            <i class="fa-brands fa-python"></i>
+            <h3>Programmation Python</h3>
+            <p>Maîtrisez Python, la POO, les structures de données et l'algorithmique avancée.</p>
+            <span class="card-link">Voir les cours <i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+        <div class="card" onclick="showSection('cours')">
+            <i class="fa-solid fa-network-wired"></i>
+            <h3>Architecture & Réseaux</h3>
+            <p>TCP/IP, protocoles de routage, Von Neumann, systèmes d'exploitation.</p>
+            <span class="card-link">Voir les cours <i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+        <div class="card" onclick="showSection('cours')">
+            <i class="fa-solid fa-database"></i>
+            <h3>Bases de Données SQL</h3>
+            <p>Modèle relationnel, SQL avancé, jointures, algèbre relationnelle.</p>
+            <span class="card-link">Voir les cours <i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+        <div class="card" onclick="showSection('ide')">
+            <i class="fa-solid fa-code"></i>
+            <h3>IDE Python Intégré</h3>
+            <p>Exécutez du Python directement dans le navigateur. 15+ exemples NSI prêts à l'emploi.</p>
+            <span class="card-link">Ouvrir l'IDE <i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+    </div>
+</section>
+
+<!-- ===== COURS ===== -->
+<section id="cours" class="content-section" style="display:none;">
+
+    <div id="course-list-container">
+        <div class="progress-overview">
+            <h2>Votre Progression</h2>
+            <div class="progress-bar-global">
+                <div id="globalProgressBar" class="progress-fill" style="width:0%"></div>
+            </div>
+            <span id="progressText">0 / 11 chapitres complétés</span>
+        </div>
+
+        <div class="level-block">
+            <h2 class="level-title"><span class="badge premiere">1ère</span> Programme de Première</h2>
+            <div class="module-grid">
+                <div class="module-card" onclick="openCourse('rep-donnees')" data-course="rep-donnees">
+                    <div class="module-status"><i class="fa-solid fa-check"></i></div>
+                    <i class="fa-solid fa-hashtag module-icon"></i>
+                    <h4>Représentation des Données</h4>
+                    <p>Binaire, Hexadécimal, Flottants, ASCII & Unicode.</p>
+                    <div class="module-meta"><span><i class="fa-solid fa-clock"></i> 45 min</span><span><i class="fa-solid fa-dumbbell"></i> 6 exercices</span></div>
+                </div>
+                <div class="module-card" onclick="openCourse('python-base')" data-course="python-base">
+                    <div class="module-status"><i class="fa-solid fa-check"></i></div>
+                    <i class="fa-brands fa-python module-icon"></i>
+                    <h4>Langage Python</h4>
+                    <p>Variables, Boucles, Fonctions, Listes, Dictionnaires.</p>
+                    <div class="module-meta"><span><i class="fa-solid fa-clock"></i> 60 min</span><span><i class="fa-solid fa-dumbbell"></i> 7 exercices</span></div>
+                </div>
+                <div class="module-card" onclick="openCourse('algo-tri')" data-course="algo-tri">
+                    <div class="module-status"><i class="fa-solid fa-check"></i></div>
+                    <i class="fa-solid fa-arrow-down-short-wide module-icon"></i>
+                    <h4>Algorithmique (1)</h4>
+                    <p>Complexité, Tris, Dichotomie, KNN.</p>
+                    <div class="module-meta"><span><i class="fa-solid fa-clock"></i> 50 min</span><span><i class="fa-solid fa-dumbbell"></i> 5 exercices</span></div>
+                </div>
+                <div class="module-card" onclick="openCourse('web-intro')" data-course="web-intro">
+                    <div class="module-status"><i class="fa-solid fa-check"></i></div>
+                    <i class="fa-solid fa-globe module-icon"></i>
+                    <h4>Web & Protocole HTTP</h4>
+                    <p>HTTP, HTML/CSS, Client-Serveur, Formulaires.</p>
+                    <div class="module-meta"><span><i class="fa-solid fa-clock"></i> 40 min</span><span><i class="fa-solid fa-dumbbell"></i> 5 exercices</span></div>
+                </div>
+                <div class="module-card" onclick="openCourse('archi-os')" data-course="archi-os">
+                    <div class="module-status"><i class="fa-solid fa-check"></i></div>
+                    <i class="fa-solid fa-microchip module-icon"></i>
+                    <h4>Architecture & OS</h4>
+                    <p>Von Neumann, Portes Logiques, Linux.</p>
+                    <div class="module-meta"><span><i class="fa-solid fa-clock"></i> 45 min</span><span><i class="fa-solid fa-dumbbell"></i> 5 exercices</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="level-block">
+            <h2 class="level-title"><span class="badge terminale">Term</span> Programme de Terminale</h2>
+            <div class="module-grid">
+                <div class="module-card" onclick="openCourse('poo')" data-course="poo">
+                    <div class="module-status"><i class="fa-solid fa-check"></i></div>
+                    <i class="fa-solid fa-cubes module-icon"></i>
+                    <h4>Programmation Orientée Objet</h4>
+                    <p>Classes, Attributs, Méthodes, Héritage.</p>
+                    <div class="module-meta"><span><i class="fa-solid fa-clock"></i> 55 min</span><span><i class="fa-solid fa-dumbbell"></i> 6 exercices</span></div>
+                </div>
+                <div class="module-card" onclick="openCourse('struct-lin')" data-course="struct-lin">
+                    <div class="module-status"><i class="fa-solid fa-check"></i></div>
+                    <i class="fa-solid fa-layer-group module-icon"></i>
+                    <h4>Structures Linéaires</h4>
+                    <p>Listes Chaînées, Piles, Files.</p>
+                    <div class="module-meta"><span><i class="fa-solid fa-clock"></i> 50 min</span><span><i class="fa-solid fa-dumbbell"></i> 6 exercices</span></div>
+                </div>
+                <div class="module-card" onclick="openCourse('arbres')" data-course="arbres">
+                    <div class="module-status"><i class="fa-solid fa-check"></i></div>
+                    <i class="fa-solid fa-diagram-project module-icon"></i>
+                    <h4>Arbres & Graphes</h4>
+                    <p>Arbres Binaires, ABR, Parcours, BFS/DFS.</p>
+                    <div class="module-meta"><span><i class="fa-solid fa-clock"></i> 60 min</span><span><i class="fa-solid fa-dumbbell"></i> 7 exercices</span></div>
+                </div>
+                <div class="module-card" onclick="openCourse('sql-bdd')" data-course="sql-bdd">
+                    <div class="module-status"><i class="fa-solid fa-check"></i></div>
+                    <i class="fa-solid fa-database module-icon"></i>
+                    <h4>Bases de Données SQL</h4>
+                    <p>Modèle Relationnel, SQL complet, Jointures.</p>
+                    <div class="module-meta"><span><i class="fa-solid fa-clock"></i> 55 min</span><span><i class="fa-solid fa-dumbbell"></i> 6 exercices</span></div>
+                </div>
+                <div class="module-card" onclick="openCourse('recursivite')" data-course="recursivite">
+                    <div class="module-status"><i class="fa-solid fa-check"></i></div>
+                    <i class="fa-solid fa-infinity module-icon"></i>
+                    <h4>Récursivité & Diviser</h4>
+                    <p>Récursivité, Tri Fusion, Complexité.</p>
+                    <div class="module-meta"><span><i class="fa-solid fa-clock"></i> 50 min</span><span><i class="fa-solid fa-dumbbell"></i> 5 exercices</span></div>
+                </div>
+                <div class="module-card" onclick="openCourse('reseaux-secu')" data-course="reseaux-secu">
+                    <div class="module-status"><i class="fa-solid fa-check"></i></div>
+                    <i class="fa-solid fa-shield-halved module-icon"></i>
+                    <h4>Réseaux & Sécurité</h4>
+                    <p>TCP/IP, Routage RIP/OSPF, Chiffrement.</p>
+                    <div class="module-meta"><span><i class="fa-solid fa-clock"></i> 55 min</span><span><i class="fa-solid fa-dumbbell"></i> 6 exercices</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VISIONNEUSE -->
+    <div id="course-viewer" style="display: none;">
+        <div class="course-toolbar">
+            <button class="btn-back" onclick="closeCourse()"><i class="fa-solid fa-arrow-left"></i> Sommaire</button>
+            <div class="course-actions">
+                <button id="markCompleteBtn" class="btn-complete" onclick="markCourseComplete()"><i class="fa-solid fa-circle-check"></i> Marquer comme lu</button>
+                <button class="btn-quiz-launch" onclick="launchCourseQuiz()"><i class="fa-solid fa-circle-question"></i> Faire le QCM</button>
+                <button class="btn-ide-link" onclick="showSection('ide')"><i class="fa-brands fa-python"></i> Pratiquer dans l'IDE</button>
+            </div>
+        </div>
+
+        <div class="course-header-display">
+            <span id="course-tag" class="badge">Niveau</span>
+            <h2 id="course-title">Titre du Cours</h2>
+        </div>
+
+        <div class="course-body">
+            <aside class="toc-sidebar">
+                <h4><i class="fa-solid fa-list"></i> Sommaire</h4>
+                <ul id="toc-list"></ul>
+            </aside>
+            <div class="course-main">
+                <article id="course-content" class="theory-block"></article>
+
+                <div class="keypoints-block" id="keypoints-block">
+                    <h3><i class="fa-solid fa-key"></i> Points Clés à Retenir</h3>
+                    <ul id="keypoints-list"></ul>
+                </div>
+
+                <hr class="divider">
+
+                <div class="exercises-block">
+                    <h3><i class="fa-solid fa-dumbbell"></i> Zone d'Entraînement</h3>
+                    <p class="intro-exo">Teste tes connaissances. Clique sur "Voir la Correction" pour la réponse.</p>
+                    <div id="course-exercises"></div>
+                </div>
+
+                <div class="faq-section">
+                    <div class="faq-header">
+                        <i class="fa-solid fa-headset"></i>
+                        <div><h4>Besoin d'aide sur ce chapitre ?</h4><p>Envoie ta question directement au professeur.</p></div>
+                    </div>
+                    <form onsubmit="sendMail(event)" class="faq-form">
+                        <div class="input-group">
+                            <label>Ton Nom</label>
+                            <input type="text" id="student-name" placeholder="Ex: Ada Lovelace" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Ta Question Précise</label>
+                            <textarea id="student-question" placeholder="Je ne comprends pas la notion de..." rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn-send"><i class="fa-solid fa-paper-plane"></i> Envoyer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== IDE PYTHON ===== -->
+<section id="ide" class="content-section" style="display:none;">
+    <div class="ide-header-bar">
+        <div class="ide-title">
+            <i class="fa-brands fa-python"></i>
+            <h2>IDE Python NSI</h2>
+            <span class="ide-badge">Python 3 — Exécution navigateur</span>
+        </div>
+        <div class="ide-controls">
+            <select id="ide-examples" onchange="loadExample(this.value)" class="ide-select">
+                <option value="">Charger un exemple...</option>
+                <optgroup label="Bases du langage">
+                    <option value="hello">Hello World</option>
+                    <option value="variables">Variables et Types</option>
+                    <option value="boucles">Boucles for / while</option>
+                    <option value="fonctions">Fonctions</option>
+                    <option value="listes">Listes et opérations</option>
+                    <option value="dict">Dictionnaires</option>
+                </optgroup>
+                <optgroup label="Algorithmique">
+                    <option value="tri-insertion">Tri par Insertion</option>
+                    <option value="tri-selection">Tri par Sélection</option>
+                    <option value="tri-fusion">Tri Fusion</option>
+                    <option value="dichotomie">Recherche Dichotomique</option>
+                    <option value="knn">Algorithme KNN (simplifié)</option>
+                </optgroup>
+                <optgroup label="Structures de données">
+                    <option value="pile">Pile (Stack - LIFO)</option>
+                    <option value="file">File (Queue - FIFO)</option>
+                    <option value="liste-chainee">Liste Chaînée</option>
+                </optgroup>
+                <optgroup label="POO">
+                    <option value="classe">Classe simple</option>
+                    <option value="heritage">Héritage</option>
+                </optgroup>
+                <optgroup label="Récursivité">
+                    <option value="facto">Factorielle récursive</option>
+                    <option value="fibo">Fibonacci récursif</option>
+                    <option value="hanoi">Tours de Hanoï</option>
+                </optgroup>
+                <optgroup label="Cryptographie">
+                    <option value="cesar">Chiffrement de César</option>
+                </optgroup>
+            </select>
+        </div>
+    </div>
+
+    <div class="ide-workspace">
+        <div class="ide-pane editor-pane">
+            <div class="pane-header">
+                <span><i class="fa-solid fa-file-code"></i> main.py</span>
+                <div class="pane-actions">
+                    <button onclick="runCode()" class="btn-run"><i class="fa-solid fa-play"></i> Exécuter (F5)</button>
+                    <button onclick="clearEditor()" class="btn-clear-editor" title="Effacer l'éditeur"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+            <textarea id="python-editor" spellcheck="false"># Bienvenue dans l'IDE NSI !
+# Écris ton code Python ici et clique sur "Exécuter" (ou F5)
+
+print("Bonjour NSI !")
+
+# Exemple : boucle et calcul
+for i in range(1, 6):
+    carre = i ** 2
+    print(f"{i}² = {carre}")</textarea>
+        </div>
+
+        <div class="ide-pane output-pane">
+            <div class="pane-header">
+                <span><i class="fa-solid fa-terminal"></i> Sortie console</span>
+                <button onclick="clearOutput()" class="btn-clear-out" title="Effacer la sortie"><i class="fa-solid fa-xmark"></i> Effacer</button>
+            </div>
+            <div id="python-output" class="output-content"><span class="output-hint">La sortie de ton programme apparaîtra ici...</span></div>
+        </div>
+    </div>
+
+    <div class="ide-help">
+        <div class="shortcuts-grid">
+            <span><kbd>Tab</kbd> Indenter (4 espaces)</span>
+            <span><kbd>F5</kbd> Exécuter</span>
+            <span><kbd>Ctrl+A</kbd> Tout sélectionner</span>
+            <span><kbd>Ctrl+Z</kbd> Annuler</span>
+        </div>
+        <p class="ide-warning"><i class="fa-solid fa-circle-info"></i> L'IDE exécute Python dans le navigateur via Skulpt. <code>input()</code> et certains modules avancés ne sont pas disponibles.</p>
+    </div>
+</section>
+
+<!-- ===== QCM ===== -->
+<section id="qcm" class="content-section" style="display:none;">
+
+    <div id="qcm-selector">
+        <div class="section-title-block">
+            <h2><i class="fa-solid fa-circle-question"></i> Quiz & QCM</h2>
+            <p>Teste tes connaissances chapitre par chapitre. Chaque bonne réponse rapporte des XP !</p>
+        </div>
+        <div class="qcm-grid">
+            <div class="qcm-topic-card" onclick="startQuiz('rep-donnees')"><i class="fa-solid fa-hashtag"></i><h4>Repr. des Données</h4><span class="badge premiere">1ère</span><div class="q-count">8 questions</div></div>
+            <div class="qcm-topic-card" onclick="startQuiz('python-base')"><i class="fa-brands fa-python"></i><h4>Langage Python</h4><span class="badge premiere">1ère</span><div class="q-count">8 questions</div></div>
+            <div class="qcm-topic-card" onclick="startQuiz('algo-tri')"><i class="fa-solid fa-arrow-down-short-wide"></i><h4>Algorithmique</h4><span class="badge premiere">1ère</span><div class="q-count">8 questions</div></div>
+            <div class="qcm-topic-card" onclick="startQuiz('web-intro')"><i class="fa-solid fa-globe"></i><h4>Web & HTTP</h4><span class="badge premiere">1ère</span><div class="q-count">7 questions</div></div>
+            <div class="qcm-topic-card" onclick="startQuiz('archi-os')"><i class="fa-solid fa-microchip"></i><h4>Architecture & OS</h4><span class="badge premiere">1ère</span><div class="q-count">7 questions</div></div>
+            <div class="qcm-topic-card" onclick="startQuiz('poo')"><i class="fa-solid fa-cubes"></i><h4>POO</h4><span class="badge terminale">Term</span><div class="q-count">8 questions</div></div>
+            <div class="qcm-topic-card" onclick="startQuiz('struct-lin')"><i class="fa-solid fa-layer-group"></i><h4>Structures Linéaires</h4><span class="badge terminale">Term</span><div class="q-count">7 questions</div></div>
+            <div class="qcm-topic-card" onclick="startQuiz('arbres')"><i class="fa-solid fa-diagram-project"></i><h4>Arbres & Graphes</h4><span class="badge terminale">Term</span><div class="q-count">8 questions</div></div>
+            <div class="qcm-topic-card" onclick="startQuiz('sql-bdd')"><i class="fa-solid fa-database"></i><h4>Bases de Données</h4><span class="badge terminale">Term</span><div class="q-count">8 questions</div></div>
+            <div class="qcm-topic-card" onclick="startQuiz('recursivite')"><i class="fa-solid fa-infinity"></i><h4>Récursivité</h4><span class="badge terminale">Term</span><div class="q-count">7 questions</div></div>
+            <div class="qcm-topic-card" onclick="startQuiz('reseaux-secu')"><i class="fa-solid fa-shield-halved"></i><h4>Réseaux & Sécurité</h4><span class="badge terminale">Term</span><div class="q-count">8 questions</div></div>
+            <div class="qcm-topic-card special" onclick="startQuiz('all')"><i class="fa-solid fa-trophy"></i><h4>Bac Blanc Complet</h4><span class="badge" style="background:#f59e0b">Bac</span><div class="q-count">20 questions aléatoires</div></div>
+        </div>
+    </div>
+
+    <div id="qcm-runner" style="display:none;">
+        <div class="qcm-topbar">
+            <button onclick="exitQuiz()" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Quitter</button>
+            <div class="qcm-progress-info">
+                <span id="qcm-topic-name" class="qcm-topic-label"></span>
+                <div class="qcm-progress-bar"><div id="qcm-progress-fill"></div></div>
+                <span id="qcm-counter">Q 1/8</span>
+            </div>
+            <div class="qcm-score-live"><i class="fa-solid fa-star"></i> <span id="qcm-live-score">0</span> pts</div>
+        </div>
+        <div id="qcm-question-card" class="question-card">
+            <p id="qcm-question-text" class="question-text"></p>
+            <div id="qcm-choices" class="choices-grid"></div>
+            <div id="qcm-feedback" class="qcm-feedback" style="display:none;"></div>
+            <button id="qcm-next-btn" class="btn-next-q" onclick="nextQuestion()" style="display:none;">
+                Question suivante <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="qcm-results" style="display:none;">
+        <div class="results-card">
+            <div class="results-emoji" id="results-emoji"></div>
+            <h2 id="results-title"></h2>
+            <div class="score-circle-wrap">
+                <div class="score-circle"><span id="final-score"></span></div>
+            </div>
+            <p id="results-message"></p>
+            <div class="results-actions">
+                <button onclick="retryQuiz()" class="btn-primary"><i class="fa-solid fa-rotate-right"></i> Recommencer</button>
+                <button onclick="exitQuiz()" class="btn-secondary"><i class="fa-solid fa-list"></i> Changer de chapitre</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== RESSOURCES ===== -->
+<section id="ressources" class="content-section" style="display:none;">
+    <div class="section-title-block">
+        <h2><i class="fa-solid fa-folder-open"></i> Ressources NSI</h2>
+        <p>Tout ce dont tu as besoin pour préparer le Bac NSI.</p>
+    </div>
+
+    <div class="resources-tabs">
+        <button class="rtab active" onclick="showRTab('fiches', this)"><i class="fa-solid fa-file-alt"></i> Fiches de Révision</button>
+        <button class="rtab" onclick="showRTab('liens', this)"><i class="fa-solid fa-link"></i> Liens Utiles</button>
+        <button class="rtab" onclick="showRTab('bac', this)"><i class="fa-solid fa-graduation-cap"></i> Annales & Bac</button>
+        <button class="rtab" onclick="showRTab('projets', this)"><i class="fa-solid fa-gamepad"></i> Projets & Challenges</button>
+    </div>
+
+    <div id="rtab-fiches" class="rtab-content">
+        <div class="fiche-grid">
+            <div class="fiche-card" onclick="showFiche('binaire')"><i class="fa-solid fa-hashtag"></i><h4>Conversions Binaire / Hexa</h4><p>Méthodes de conversion, complément à 2, tables de référence.</p><span class="fiche-btn">Consulter</span></div>
+            <div class="fiche-card" onclick="showFiche('python-cheatsheet')"><i class="fa-brands fa-python"></i><h4>Python Cheat Sheet</h4><p>Toutes les syntaxes Python essentielles en un coup d'œil.</p><span class="fiche-btn">Consulter</span></div>
+            <div class="fiche-card" onclick="showFiche('sql-cheatsheet')"><i class="fa-solid fa-database"></i><h4>SQL Cheat Sheet</h4><p>SELECT, JOIN, GROUP BY... toutes les requêtes clés du programme.</p><span class="fiche-btn">Consulter</span></div>
+            <div class="fiche-card" onclick="showFiche('complexite')"><i class="fa-solid fa-chart-line"></i><h4>Tableau de Complexité</h4><p>Complexité temporelle et spatiale des algorithmes du programme.</p><span class="fiche-btn">Consulter</span></div>
+            <div class="fiche-card" onclick="showFiche('reseaux-fiche')"><i class="fa-solid fa-network-wired"></i><h4>Réseaux & Protocoles</h4><p>Modèle TCP/IP, protocoles, adressage IP, routage.</p><span class="fiche-btn">Consulter</span></div>
+            <div class="fiche-card" onclick="showFiche('structures-fiche')"><i class="fa-solid fa-layer-group"></i><h4>Structures de Données</h4><p>Résumé complet : piles, files, listes chaînées, arbres, graphes.</p><span class="fiche-btn">Consulter</span></div>
+        </div>
+        <div id="fiche-viewer" style="display:none;" class="fiche-viewer-modal">
+            <div class="fiche-viewer-inner">
+                <button onclick="closeFiche()" class="fiche-close"><i class="fa-solid fa-xmark"></i> Fermer</button>
+                <div id="fiche-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="rtab-liens" class="rtab-content" style="display:none;">
+        <div class="liens-grid">
+            <a href="https://docs.python.org/fr/3/" target="_blank" class="lien-card"><div class="lien-icon lpy"><i class="fa-brands fa-python"></i></div><div class="lien-info"><h4>Documentation Python Officielle</h4><p>La référence complète de Python en français.</p><span>docs.python.org</span></div><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+            <a href="https://pythontutor.com/" target="_blank" class="lien-card"><div class="lien-icon ltutor"><i class="fa-solid fa-eye"></i></div><div class="lien-info"><h4>Python Tutor</h4><p>Visualise l'exécution de ton code étape par étape.</p><span>pythontutor.com</span></div><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+            <a href="https://www.sql.sh/" target="_blank" class="lien-card"><div class="lien-icon lsql"><i class="fa-solid fa-database"></i></div><div class="lien-info"><h4>SQL.sh — Référence SQL</h4><p>Référence complète des commandes SQL en français.</p><span>sql.sh</span></div><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+            <a href="https://www.cs.usfca.edu/~galles/visualization/Algorithms.html" target="_blank" class="lien-card"><div class="lien-icon lalgo"><i class="fa-solid fa-chart-bar"></i></div><div class="lien-info"><h4>Visualisation d'Algorithmes</h4><p>Animations interactives des tris et structures de données.</p><span>cs.usfca.edu</span></div><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+            <a href="https://eduscol.education.fr/2068/programmes-et-ressources-en-numerique-et-sciences-informatiques-voie-gt" target="_blank" class="lien-card"><div class="lien-icon ledus"><i class="fa-solid fa-graduation-cap"></i></div><div class="lien-info"><h4>Programme Officiel NSI</h4><p>Bulletins officiels et ressources d'Éduscol pour NSI.</p><span>eduscol.education.fr</span></div><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+            <a href="https://capytale.fr/" target="_blank" class="lien-card"><div class="lien-icon lcapy"><i class="fa-solid fa-laptop-code"></i></div><div class="lien-info"><h4>Capytale</h4><p>La plateforme nationale de notebooks Python pour l'éducation.</p><span>capytale.fr</span></div><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+            <a href="https://www.france-ioi.org/" target="_blank" class="lien-card"><div class="lien-icon lioi"><i class="fa-solid fa-trophy"></i></div><div class="lien-info"><h4>France IOI</h4><p>Exercices progressifs d'algorithmique et de programmation.</p><span>france-ioi.org</span></div><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+            <a href="https://www.nsi.fr/" target="_blank" class="lien-card"><div class="lien-icon lnsi"><i class="fa-solid fa-book-open"></i></div><div class="lien-info"><h4>Portail NSI</h4><p>Ressources pédagogiques pour enseignants et élèves NSI.</p><span>nsi.fr</span></div><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        </div>
+    </div>
+
+    <div id="rtab-bac" class="rtab-content" style="display:none;">
+        <div class="section-title-block" style="margin-bottom:2rem;">
+            <h3>Annales du Bac NSI</h3>
+            <p>Sujets des années précédentes pour s'entraîner dans les conditions du Bac.</p>
+        </div>
+        <div class="annales-grid">
+            <div class="annale-card"><div class="annale-year">2024</div><div class="annale-info"><h4>Bac NSI Terminale 2024</h4><div class="annale-topics"><span>Python</span><span>SQL</span><span>Graphes</span><span>POO</span></div><a href="https://www.sujetdebac.fr/annales/terminale/numerique-sciences-informatiques/" target="_blank" class="btn-annale">Voir les sujets <i class="fa-solid fa-arrow-up-right-from-square"></i></a></div></div>
+            <div class="annale-card"><div class="annale-year">2023</div><div class="annale-info"><h4>Bac NSI Terminale 2023</h4><div class="annale-topics"><span>Récursivité</span><span>Arbres</span><span>SQL</span><span>Réseaux</span></div><a href="https://www.sujetdebac.fr/annales/terminale/numerique-sciences-informatiques/" target="_blank" class="btn-annale">Voir les sujets <i class="fa-solid fa-arrow-up-right-from-square"></i></a></div></div>
+            <div class="annale-card"><div class="annale-year">2022</div><div class="annale-info"><h4>Bac NSI Terminale 2022</h4><div class="annale-topics"><span>Algorithmes</span><span>BDD</span><span>Architecture</span></div><a href="https://www.sujetdebac.fr/annales/terminale/numerique-sciences-informatiques/" target="_blank" class="btn-annale">Voir les sujets <i class="fa-solid fa-arrow-up-right-from-square"></i></a></div></div>
+        </div>
+        <div class="bac-tips">
+            <h3><i class="fa-solid fa-lightbulb"></i> Conseils pour le Bac NSI</h3>
+            <div class="tips-grid">
+                <div class="tip-item"><strong>Structure du sujet</strong><p>3 exercices indépendants. Lisez-les tous avant de commencer et choisissez votre ordre.</p></div>
+                <div class="tip-item"><strong>Algorithmes en Python</strong><p>Rédigez lisiblement, respectez l'indentation, commentez votre démarche.</p></div>
+                <div class="tip-item"><strong>SQL</strong><p>Soignez la syntaxe. JOIN, GROUP BY et fonctions d'agrégation (COUNT, SUM) sont fréquents.</p></div>
+                <div class="tip-item"><strong>POO & Récursivité</strong><p>Sachez définir une classe complète. Pour la récursivité, identifiez toujours le cas de base.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="rtab-projets" class="rtab-content" style="display:none;">
+        <div class="challenge-grid">
+            <div class="challenge-card"><div class="challenge-icon python"><i class="fa-brands fa-python"></i></div><div class="challenge-info"><span class="challenge-tag easy">Facile</span><h3>Traitement d'Image (PIL)</h3><p>Manipule les pixels d'une image : inversion des couleurs, passage en noir & blanc, filtre flou.</p><div class="xp-bar"><div class="fill" style="width:30%"></div><span>300 XP</span></div></div><button class="btn-start" onclick="showSection('ide')">Ouvrir dans l'IDE</button></div>
+            <div class="challenge-card"><div class="challenge-icon sql"><i class="fa-solid fa-database"></i></div><div class="challenge-info"><span class="challenge-tag hard">Difficile</span><h3>Enquête SQL</h3><p>Une base de données contient des indices. Utilisez SQL pour retrouver le coupable.</p><div class="xp-bar"><div class="fill" style="width:80%"></div><span>800 XP</span></div></div><button class="btn-start" onclick="openCourse('sql-bdd'); showSection('cours');">Réviser SQL d'abord</button></div>
+            <div class="challenge-card"><div class="challenge-icon algo"><i class="fa-solid fa-microchip"></i></div><div class="challenge-info"><span class="challenge-tag medium">Moyen</span><h3>Labyrinthe Récursif</h3><p>Implémente un algorithme de backtracking pour explorer et sortir d'un labyrinthe généré.</p><div class="xp-bar"><div class="fill" style="width:50%"></div><span>500 XP</span></div></div><button class="btn-start" onclick="loadExample('facto'); showSection('ide');">Voir un exemple récursif</button></div>
+            <div class="challenge-card"><div class="challenge-icon" style="background:linear-gradient(135deg,#10b981,#3b82f6)"><i class="fa-solid fa-shield-halved"></i></div><div class="challenge-info"><span class="challenge-tag medium">Moyen</span><h3>Chiffrement de César</h3><p>Implémente le chiffrement de César puis tente de déchiffrer un message codé par analyse de fréquences.</p><div class="xp-bar"><div class="fill" style="width:40%"></div><span>400 XP</span></div></div><button class="btn-start" onclick="loadExample('cesar'); showSection('ide');">Coder le chiffrement</button></div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== GLOSSAIRE ===== -->
+<section id="glossaire" class="content-section" style="display:none;">
+    <div class="section-title-block">
+        <h2><i class="fa-solid fa-spell-check"></i> Glossaire NSI</h2>
+        <p>Définitions de tous les termes clés du programme de Première et Terminale.</p>
+    </div>
+    <div class="glossaire-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="glossaireSearch" placeholder="Rechercher un terme (ex: récursivité, SQL, bit...)" oninput="filterGlossaire(this.value)">
+    </div>
+    <div class="glossaire-alphabet" id="glossaire-alphabet"></div>
+    <div id="glossaire-list" class="glossaire-list"></div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+    <p><strong>NSI.learn</strong> — Plateforme d'enseignement Numérique et Sciences Informatiques | Lycée</p>
+    <p>Conforme au programme officiel du Ministère de l'Éducation Nationale (BO 2019)</p>
+</footer>
+
+<div id="toast" class="toast" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
